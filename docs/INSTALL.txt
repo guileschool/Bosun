@@ -1,0 +1,22 @@
+Bosun
+Voice commands for ChatGPT on macOS
+
+Requires macOS 14 or later and an Apple Silicon Mac.
+Drag Bosun.app to Applications, then launch it.
+Allow Microphone, Speech Recognition, and Accessibility.
+Open Bosun in the menu bar and start listening.
+Menus support English and Korean.
+
+Commands: Record, Stop, Cancel, Send, Break, Clear, Delete, Undo,
+Enter, Space, Home, End.
+In phrase mode, append "please": "record please", "stop please".
+Undo restores the last Bosun Delete or Clear once if the input is unchanged.
+
+설치
+macOS 14 이상과 Apple Silicon Mac이 필요하다.
+Bosun.app을 Applications로 옮긴 뒤 실행한다.
+마이크, 음성 인식, 손쉬운 사용 권한을 허용한다.
+메뉴 막대에서 Bosun을 열고 음성 감지를 시작한다.
+영어 받아쓰기에는 복합어 모드에서 "record please"처럼 말한다.
+Undo는 입력이 그대로일 때 직전 Bosun Delete 또는 Clear를 한 번 복원한다.
+

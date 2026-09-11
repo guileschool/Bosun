@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "음성 명령을 기기 내에서 인식하기 위해 마이크를 사용합니다. 녹음 파일은 저장하지 않습니다.";
+"NSSpeechRecognitionUsageDescription" = "영어 음성 명령을 기기 내에서 인식합니다.";

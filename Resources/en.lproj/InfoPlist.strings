@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Bosun uses the microphone to recognize voice commands on your Mac. It does not save audio files.";
+"NSSpeechRecognitionUsageDescription" = "Bosun recognizes English voice commands on your Mac.";

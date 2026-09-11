@@ -1,0 +1,22 @@
+# macOS and generated output
+.DS_Store
+.AppleDouble
+.build/
+build/
+build-stage.*/
+dist/
+*.app/
+*.dmg
+*.zip
+*.log
+*.bak
+__pycache__/
+
+# Local configuration and signing material
+.env
+.env.*
+*.p12
+*.pfx
+*.key
+*.pem
+*.mobileprovision
