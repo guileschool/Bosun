@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+  <channel>
+    <title>Bosun Updates</title>
+    <link>https://github.com/guileschool/Bosun</link>
+    <description>Bosun for Apple Silicon Mac</description>
+    <item>
+      <title>Bosun 0.8.13</title>
+      <pubDate>Sat, 12 Sep 2026 01:57:19 +0900</pubDate>
+      <sparkle:version>813</sparkle:version>
+      <sparkle:shortVersionString>0.8.13</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0.0</sparkle:minimumSystemVersion>
+      <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+      <description>&lt;html&gt;&lt;head&gt;&lt;meta name="color-scheme" content="light dark"&gt;&lt;style&gt;body{font:15px -apple-system,BlinkMacSystemFont,sans-serif;line-height:1.55;padding:12px 18px}h2{font-size:20px;margin:0 0 12px}li{margin:8px 0}ul{padding-left:22px}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;h2&gt;Updates, right from Bosun&lt;/h2&gt;&lt;ul&gt;&lt;li&gt;Check for new versions from the menu bar.&lt;/li&gt;&lt;li&gt;Get update notifications with optional automatic checks.&lt;/li&gt;&lt;li&gt;Install when you choose. Bosun takes care of the restart.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</description>
+      <enclosure url="https://github.com/guileschool/Bosun/releases/download/v0.8.13/Bosun-0.8.13-arm64.dmg" length="4770625" type="application/octet-stream" sparkle:edSignature="IvoON3JMqReQXHCoHfUafjEHxktbmFBVtppS0oPQ3bkqnDhGazSJ4+og2M90Cq2fudpQrsQKm1Rd3eeL1s7oCg=="></enclosure>
+    </item>
+  </channel>
+</rss><!-- sparkle-signatures:
+edSignature: Xnk1crXc8zcUC6/BHcXkYvnhvV6hj6K4YJSZ3EmvzkNX197Ki5QyuZ9dZcVfmW/Gf5VEdJjAni9Luhw4vKvYDg==
+length: 1852
+-->
