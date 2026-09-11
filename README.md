@@ -4,6 +4,8 @@ Start ChatGPT’s microphone with your voice. Dictate your message, then send it
 
 ![Bosun demo: voice dictation, transcription, submission, and an English response](docs/media/voice-input-demo.gif)
 
+Watch with sound on YouTube: [English demo](https://www.youtube.com/shorts/i1BzBHXi8xw) · [한국어 시연](https://www.youtube.com/shorts/g9woBt5dl44)
+
 Say “Record, please”, dictate your message, then say “Send, please”. Silent demo; playback is accelerated and waiting time is shortened.
 
 [Download Bosun 0.8.12 for Mac](https://github.com/guileschool/Bosun/releases/tag/v0.8.12) — Apple Silicon, macOS 14+. Developer ID signed and Apple-notarized. Repository access is required while this repository is private.

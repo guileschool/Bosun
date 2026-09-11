@@ -4,6 +4,8 @@
 
 ![Bosun 데모: 음성 입력부터 텍스트 변환, 전송, 영어 답변까지](media/voice-input-demo.gif)
 
+소리와 함께 보기: [한국어 시연](https://www.youtube.com/shorts/g9woBt5dl44) · [English demo](https://www.youtube.com/shorts/i1BzBHXi8xw)
+
 “Record, please”로 녹음을 시작하고 메시지를 말한 뒤 “Send, please”로 전송한다. 소리가 없는 데모이며, 재생 속도를 높이고 대기 구간을 줄였다.
 
 [Mac용 Bosun 0.8.12 다운로드](https://github.com/guileschool/Bosun/releases/tag/v0.8.12) — Apple Silicon, macOS 14 이상. Developer ID 서명과 Apple 공증 완료. 저장소가 비공개인 동안에는 접근 권한이 필요하다.
