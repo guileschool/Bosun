@@ -1,17 +1,18 @@
 # Validation status
 
-Current release: **0.8.12**. Verified on 2026-09-12 (KST).
+Current release: **0.8.13**. Verified on 2026-09-12 (KST).
 
 ## Verified locally
 
-- Apple Silicon macOS application builds successfully with a Developer ID signature.
-- Command, text cleanup, cancellation, deletion restoration, and English button classification regressions pass.
-- All 78 English/Korean localization entries match with valid format arguments.
-- Packaged language resources and app icon checks pass.
-- Apple notarization accepted the release DMG. Submission ID: `7652c6ea-daa0-49e4-9f75-490560e7f93d`.
-- The DMG's notarization ticket is stapled and validates successfully.
-- macOS Gatekeeper accepts the DMG as `Notarized Developer ID`.
-- Disk image integrity verification passes; a SHA-256 checksum accompanies the release.
+- Developer ID signed Apple Silicon build and strict nested signature verification pass.
+- Command, cleanup, cancellation, deletion restoration, and English button regressions pass.
+- All 80 bilingual localization entries and packaged resources pass checks.
+- Apple notarization accepted the DMG: `104367ea-e1b6-4100-a284-7300ef9797d3`.
+- Stapled ticket validation, Gatekeeper assessment, disk image integrity and SHA-256 checks pass.
+- Sparkle signatures on the final DMG and update feed verify successfully.
+- A separate updater-enabled fixture with an older build number detected, downloaded and installed the final DMG from a loopback test server, then relaunched. Its resulting version was 813 and executable SHA-256 matched the release build; Gatekeeper accepted the updated app.
+- The release notes display an English heading and three short bullets in the actual update window.
+- The fixture is a synthetic older build. Original 0.8.12 installations have no updater and need a one-time manual DMG replacement.
 
 ## Validation limits
 

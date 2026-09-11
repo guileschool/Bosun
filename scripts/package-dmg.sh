@@ -33,4 +33,7 @@ if [[ "$MODE" == '--release' ]]; then
 fi
 hdiutil verify "dist/$LABEL.dmg"
 (cd dist && shasum -a 256 "$LABEL.dmg" > "$LABEL.dmg.sha256")
+if [[ "$MODE" == '--release' ]]; then
+  python3 scripts/make-appcast.py "dist/$LABEL.dmg"
+fi
 print "Created: $PWD/dist/$LABEL.dmg"

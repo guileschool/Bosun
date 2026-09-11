@@ -4,11 +4,17 @@
 
 ## Requirements and installation
 
-Use an Apple Silicon Mac running macOS 14 or later. On-device English speech recognition must be available. Download the signed and Apple-notarized DMG from [release 0.8.12](https://github.com/guileschool/Bosun/releases/tag/v0.8.12). Access requires permission while the repository is private.
+Use an Apple Silicon Mac running macOS 14 or later. On-device English speech recognition must be available. Download the signed and Apple-notarized DMG from [release 0.8.13](https://github.com/guileschool/Bosun/releases/latest). Access requires permission while the repository is private.
 
 Open the DMG, drag Bosun into Applications, and launch it there. Bosun appears in the menu bar. Grant Microphone, Speech Recognition, and Accessibility permissions in System Settings → Privacy & Security. Use the same Developer ID signed app for updates to preserve existing permissions.
 
 For a local source build, follow the build instructions in the overview. An ad-hoc test build is not a replacement for a signed installed app.
+
+## Updates
+
+Choose **Check for Updates…** from the Bosun menu to download and install a new version. Enable **Automatically Check for Updates** in Settings to receive update notifications. Installation requires your confirmation; Bosun then restarts.
+
+**Using 0.8.12 or earlier?** Quit Bosun and replace it in Applications with the latest DMG once. In-app updates are available starting with 0.8.13.
 
 ## First use
 

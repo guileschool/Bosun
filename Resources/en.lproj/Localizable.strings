@@ -81,3 +81,6 @@
 "action.delete" = "Delete · Remove last word";
 
 "action.undo" = "Undo · Restore last deletion only";
+
+"업데이트 확인…" = "Check for Updates…";
+"업데이트 자동 확인" = "Automatically Check for Updates";

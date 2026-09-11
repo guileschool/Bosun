@@ -22,9 +22,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.8.12</string>
+	<string>0.8.13</string>
 	<key>CFBundleVersion</key>
-	<string>812</string>
+	<string>813</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>LSUIElement</key>
@@ -35,5 +35,17 @@
 	<string>Bosun uses the microphone to recognize voice commands on your Mac. It does not save audio files.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Bosun recognizes English voice commands on your Mac.</string>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/guileschool/Bosun/main/docs/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>YnmHHT5o2ldDJcYSwGAK1ky2bNsbqB3cWgF0IxkAhAA=</string>
+	<key>SUAllowsAutomaticUpdates</key>
+	<false/>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 </dict>
 </plist>

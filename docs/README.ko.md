@@ -8,7 +8,7 @@
 
 “Record, please”로 녹음을 시작하고 메시지를 말한 뒤 “Send, please”로 전송한다. 소리가 없는 데모이며, 재생 속도를 높이고 대기 구간을 줄였다.
 
-[Mac용 Bosun 0.8.12 다운로드](https://github.com/guileschool/Bosun/releases/tag/v0.8.12) — Apple Silicon, macOS 14 이상. Developer ID 서명과 Apple 공증 완료. 저장소가 비공개인 동안에는 접근 권한이 필요하다.
+[Mac용 Bosun 다운로드](https://github.com/guileschool/Bosun/releases/latest) — Apple Silicon, macOS 14 이상. Developer ID 서명과 Apple 공증 완료.
 
 매번 녹음·정지 버튼을 찾아 누르는 일을 줄이기 위해 만들었다. 소스에는 MIT 라이선스를 적용한다.
 
@@ -16,9 +16,15 @@
 
 ## 현재 상태
 
-현재 릴리스는 **0.8.12**다. macOS 14 이상, Apple Silicon Mac과 기기 내 영어 음성 인식 자산이 필요하다. 메뉴는 한국어와 영어를 지원한다.
+현재 릴리스는 **0.8.13**이다. macOS 14 이상, Apple Silicon Mac과 기기 내 영어 음성 인식 자산이 필요하다. 메뉴는 한국어와 영어를 지원한다.
 
 자동 검사는 통과했다. 배포용 DMG는 Apple 공증과 공증 티켓 첨부를 마쳤고 macOS Gatekeeper 검사도 통과했다. 전체 음성명령의 실제 동작과 다른 Mac에서의 새 설치는 아직 검증하지 않았다. [검증 상태](VALIDATION.md)를 참고한다.
+
+## 업데이트
+
+Bosun 메뉴에서 **업데이트 확인…**을 선택하면 새 버전을 다운로드하고 설치할 수 있다. 설정의 **업데이트 자동 확인**을 켜면 새 버전 알림을 받는다. 설치는 사용자가 승인한 뒤 진행하며 Bosun이 다시 실행된다.
+
+**0.8.12 이하를 사용한다면** 이번 한 번은 Bosun을 종료하고 최신 DMG의 앱으로 Applications 설치본을 교체한다. 앱 안에서 업데이트하는 기능은 0.8.13부터 제공한다.
 
 ## 명령어
 

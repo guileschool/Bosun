@@ -7,6 +7,8 @@ if [[ $# -gt 0 ]]; then
   exit 64
 fi
 APP=Bosun
+zsh scripts/fetch-sparkle.sh
+SPARKLE="$PWD/build/dependencies/Sparkle-2.9.6"
 # Preserve the installed app's identity so macOS accessibility grants survive updates.
 # Ad-hoc builds require an explicit SIGN_IDENTITY=- and must not replace the installed app.
 if [[ -z "${SIGN_IDENTITY:-}" ]]; then
@@ -23,9 +25,23 @@ xcrun swiftc -swift-version 5 -O -module-cache-path build/module-cache-v080 \
   -target "${ARCH:-arm64}-apple-macosx14.0" Sources/*.swift \
   -o "$STAGING/$APP.app/Contents/MacOS/$APP" \
   -framework AppKit -framework ApplicationServices -framework AVFoundation \
-  -framework Speech -framework ServiceManagement
+  -framework Speech -framework ServiceManagement \
+  -F "$SPARKLE" -framework Sparkle -Xlinker -rpath -Xlinker @executable_path/../Frameworks
 cp Info.plist "$STAGING/$APP.app/Contents/Info.plist"
 ditto Resources "$STAGING/$APP.app/Contents/Resources"
+cp docs/THIRD-PARTY-NOTICES.txt "$STAGING/$APP.app/Contents/Resources/THIRD-PARTY-NOTICES.txt"
+mkdir -p "$STAGING/$APP.app/Contents/Frameworks"
+ditto "$SPARKLE/Sparkle.framework" "$STAGING/$APP.app/Contents/Frameworks/Sparkle.framework"
+# Sign nested executables from the inside out with the app's identity.
+FRAMEWORK="$STAGING/$APP.app/Contents/Frameworks/Sparkle.framework"
+SIGN_ARGS=(--force --sign "$SIGN_IDENTITY")
+[[ "$SIGN_IDENTITY" == '-' ]] || SIGN_ARGS+=(--options runtime --timestamp)
+for COMPONENT in "$FRAMEWORK/Versions/B/Autoupdate" \
+  "$FRAMEWORK/Versions/B/Updater.app" \
+  "$FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" \
+  "$FRAMEWORK/Versions/B/XPCServices/Installer.xpc" "$FRAMEWORK"; do
+  codesign "${SIGN_ARGS[@]}" "$COMPONENT"
+done
 plutil -lint "$STAGING/$APP.app/Contents/Info.plist"
 if [[ -n "${SIGN_IDENTITY:-}" && "$SIGN_IDENTITY" != '-' ]]; then
   codesign --force --options runtime --timestamp --entitlements Entitlements.plist \
@@ -33,7 +49,7 @@ if [[ -n "${SIGN_IDENTITY:-}" && "$SIGN_IDENTITY" != '-' ]]; then
 else
   codesign --force --sign - "$STAGING/$APP.app"
 fi
-codesign --verify --strict "$STAGING/$APP.app"
+codesign --verify --deep --strict "$STAGING/$APP.app"
 rm -rf "build/$APP.app"
 mv "$STAGING/$APP.app" "build/$APP.app"
 print "Built: $PWD/build/$APP.app"

@@ -8,7 +8,7 @@ Watch with sound on YouTube: [English demo](https://www.youtube.com/shorts/i1BzB
 
 Say “Record, please”, dictate your message, then say “Send, please”. Silent demo; playback is accelerated and waiting time is shortened.
 
-[Download Bosun 0.8.12 for Mac](https://github.com/guileschool/Bosun/releases/tag/v0.8.12) — Apple Silicon, macOS 14+. Developer ID signed and Apple-notarized. Repository access is required while this repository is private.
+[Download Bosun for Mac](https://github.com/guileschool/Bosun/releases/latest) — Apple Silicon, macOS 14+. Developer ID signed and Apple-notarized.
 
 [한국어](docs/README.ko.md) · [Install, use & troubleshooting](docs/USAGE.md) · [Architecture](docs/architecture.ko.md) · [Release guide](docs/RELEASING.md)
 
@@ -16,9 +16,15 @@ Bosun runs in the menu bar and controls dictation and text editing with spoken E
 
 ## Status
 
-Current release: **0.8.12**. Targets Apple Silicon and macOS 14 or later, with English recognition assets available on the device. Menus support English and Korean.
+Current release: **0.8.13**. Targets Apple Silicon and macOS 14 or later, with English recognition assets available on the device. Menus support English and Korean.
 
 Automated checks pass. The release DMG is notarized, its ticket is stapled, and macOS Gatekeeper accepts it. Full spoken-command testing and installation on another Mac are not yet verified. See [validation status](docs/VALIDATION.md).
+
+## Updates
+
+Choose **Check for Updates…** from the Bosun menu to download and install a new version. Enable **Automatically Check for Updates** in Settings to receive update notifications. Installation requires your confirmation; Bosun then restarts.
+
+**Using 0.8.12 or earlier?** Quit Bosun and replace it in Applications with the latest DMG once. In-app updates are available starting with 0.8.13.
 
 ## Commands
 

@@ -3,13 +3,17 @@ import ApplicationServices
 import AVFoundation
 import ServiceManagement
 import Speech
+import Sparkle
 
 
 final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
+    private let updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+    private var updateChecksItem: NSMenuItem?
     private var item: NSStatusItem!
     private var diagnosticMenuItem: NSMenuItem?
     private var header: MenuHeaderView?
     private var visibleError: String?
+    private let updateOnlyMode = CommandLine.arguments.contains("--check-for-updates")
     private let previewMode = CommandLine.arguments.contains("--preview-menu")
 
     private func updateStatusIcon() {
@@ -28,6 +32,7 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
         diagnosticMenuItem?.isHidden = !NSEvent.modifierFlags.contains(.option)
         updateStatusIcon()
+        updateChecksItem?.state = updaterController.updater.automaticallyChecksForUpdates ? .on : .off
         if !previewMode { refreshAccessibility(prompt: false) }
     }
     private let status = NSMenuItem(title: L10n.text("감지 꺼짐"), action: nil, keyEquivalent: "")
@@ -149,7 +154,7 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         loginToggle = NSMenuItem(title: L10n.text("로그인 시 자동 실행"), action: #selector(toggleLoginItem), keyEquivalent: "")
         loginToggle.target = self
         settings.addItem(loginToggle)
-        if !previewMode { setupLoginItemDefault() }
+        if !previewMode && !updateOnlyMode { setupLoginItemDefault() }
         autoStartToggle = NSMenuItem(title: L10n.text("실행 시 음성 감지 자동 시작"), action: #selector(toggleAutoStart), keyEquivalent: "")
         autoStartToggle.target = self
         autoStartToggle.state = autoStartEnabled ? .on : .off
@@ -170,12 +175,24 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let about = NSMenuItem(title: L10n.text("Bosun 정보"), action: #selector(showAbout), keyEquivalent: "")
         about.target = self
         menu.addItem(about)
+        let updateItem = NSMenuItem(title: L10n.text("업데이트 확인…"), action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+        updateItem.target = updaterController
+        menu.addItem(updateItem)
+        let automatic = NSMenuItem(title: L10n.text("업데이트 자동 확인"), action: #selector(toggleUpdateChecks), keyEquivalent: "")
+        automatic.target = self
+        updateChecksItem = automatic
+        settings.addItem(automatic)
         let quit = NSMenuItem(title: L10n.text("종료"), action: #selector(quitApp), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
         item.menu = menu
         updateStatusIcon()
         if previewMode { return }
+        updaterController.startUpdater()
+        if updateOnlyMode {
+            DispatchQueue.main.async { self.updaterController.checkForUpdates(nil) }
+            return
+        }
         refreshAccessibility(prompt: false)
         ChatGPTControl.restoreUnavailableReporter = { [weak self] in
             DispatchQueue.main.async {
@@ -618,6 +635,14 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func sleeping() { stop() }
+    @objc private func toggleUpdateChecks() {
+        let updater = updaterController.updater
+        updater.automaticallyChecksForUpdates.toggle()
+        updateChecksItem?.state = updater.automaticallyChecksForUpdates ? .on : .off
+    }
+
+    func applicationWillTerminate(_ notification: Notification) { stop() }
+
     @objc private func quitApp() { stop(); NSApp.terminate(nil) }
 }
 

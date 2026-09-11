@@ -20,3 +20,11 @@ Bosun.app을 Applications로 옮긴 뒤 실행한다.
 영어 받아쓰기에는 복합어 모드에서 "record please"처럼 말한다.
 Undo는 입력이 그대로일 때 직전 Bosun Delete 또는 Clear를 한 번 복원한다.
 
+
+Updates: Bosun menu > Check for Updates…
+Settings > Automatically Check for Updates enables update notifications.
+Installation requires confirmation. Version 0.8.12 and earlier require a one-time DMG replacement.
+
+업데이트: Bosun 메뉴 > 업데이트 확인…
+설정 > 업데이트 자동 확인을 켜면 새 버전 알림을 받는다. 설치 전 사용자 확인을 받는다.
+0.8.12 이하에서는 이번 한 번 DMG로 교체해야 한다.
