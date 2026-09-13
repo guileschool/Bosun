@@ -171,11 +171,14 @@ enum ChatGPTControl {
 
     // MARK: Commands
 
+    private static var activeLatency: LatencyTrace? // Serial command queue only.
+
     static func press(_ slot: Slot, of composer: Composer, why: String) throws {
         guard let app = targetApp(), let button = composer.button(slot),
               AX.bool(button, kAXEnabledAttribute as String) else {
             throw Failure(number: -14, message: "클릭 가능한 버튼 없음")
         }
+        activeLatency?.mark("focus_start")
         app.activate(options: [])
         guard AX.focus(button) else { throw Failure(number: -15, message: "버튼 초점 설정 실패") }
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -184,7 +187,9 @@ enum ChatGPTControl {
             if app.isActive, let focused = AX.element(appElement, kAXFocusedUIElementAttribute as String), CFEqual(focused, button) {
                 report("\(why): '\(composer.label(slot))' keyboard activation")
                 try checkSubmissionCancellation()
+                activeLatency?.mark("key_post_start")
                 postKey(49)
+                activeLatency?.mark("key_post_end")
                 return
             }
             Thread.sleep(forTimeInterval: 0.02)
@@ -193,32 +198,49 @@ enum ChatGPTControl {
     }
 
     /// AXPress may return success without a state transition in the target app.
-    static func recordingStateMatches(_ expected: Bool, timeout: TimeInterval) -> Bool {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
-            if let current = try? findComposer(), current.isRecording == expected, !expected || current.canCancel { return true }
-            Thread.sleep(forTimeInterval: 0.1)
+    static func recordingStateMatches(
+        _ expected: Bool, timeout: TimeInterval? = nil,
+        now: () -> Date = { Date() },
+        pause: (TimeInterval) -> Void = { Thread.sleep(forTimeInterval: $0) },
+        state: () -> (recording: Bool, canCancel: Bool)? = {
+            guard let current = try? findComposer() else { return nil }
+            return (current.isRecording, current.canCancel)
+        }
+    ) -> Bool {
+        // Stopping can hide the composer while long audio is transcribed.
+        // Keep startup bounded, but allow the same recording-based budget used for transcription.
+        let deadline = now().addingTimeInterval(timeout ?? (expected ? 3 : transcriptTimeout))
+        while now() < deadline {
+            if (try? checkSubmissionCancellation()) == nil { return false }
+            if let current = state(), current.recording == expected, !expected || current.canCancel { return true }
+            pause(0.1)
         }
         return false
     }
 
     static func pressRecordingControl(_ slot: Slot, expected: Bool, why: String) throws {
         let current = try findComposer()
+        activeLatency?.mark("composer_refreshed")
         try press(slot, of: current, why: why)
-        guard recordingStateMatches(expected, timeout: 3) else {
+        guard recordingStateMatches(expected, timeout: slot == .mic && !expected ? transcriptTimeout : 3) else {
+            try checkSubmissionCancellation()
             throw Failure(number: -18, message: "버튼 실행 후 녹음 상태 변화 없음")
         }
     }
 
-    static func run(_ command: VoiceCommand) throws {
+    static func run(_ command: VoiceCommand, latency: LatencyTrace? = nil) throws {
+        activeLatency = latency
+        defer { latency?.mark("run_exit"); activeLatency = nil }
         if ![.undo, .home, .end].contains(command) { invalidateRestore() }
         switch command {
         case .record:
             let c = try findComposer()
+            activeLatency?.mark("composer_found")
             report("Record: \(c.summary)")
             if c.isRecording { report("Record 무시: 이미 녹음 중"); return }
             guard isMicStartLabel(c.label(.mic)) else { throw Failure(number: -16, message: "마이크 버튼 라벨이 예상과 다름 '\(c.label(.mic))'") }
             try pressRecordingControl(.mic, expected: true, why: "Record")
+            activeLatency?.mark("recording_confirmed")
             recordingStartedAt = Date()
             report("Record 완료")
 
@@ -306,7 +328,14 @@ enum ChatGPTControl {
             report("Break 완료: 제출 중단, 진행 중인 응답 없음")
 
         case .submit:
-            try submitSequence()
+            let started = ProcessInfo.processInfo.systemUptime
+            do {
+                try submitSequence()
+            } catch {
+                let code = (error as? Failure)?.number ?? 0
+                report("Send 실패: code=\(code), elapsed=\(String(format: "%.2f", ProcessInfo.processInfo.systemUptime - started))s")
+                throw error
+            }
         }
     }
 
@@ -657,29 +686,43 @@ enum ChatGPTControl {
     // Poll until the text area holds real text (not empty, not the placeholder) that has not changed for `stableWindow`.
     // `baseline` is the value read before the stop click; the transcript must differ from it unless the baseline
     // was already real text (live transcription shown while recording).
-    static func waitForTranscript(baseline: String, wasRecording: Bool) throws -> String {
-        let deadline = Date().addingTimeInterval(transcriptTimeout)
+    static func waitForTranscript(
+        baseline: String, wasRecording: Bool,
+        now: () -> Date = { Date() },
+        pause: (TimeInterval) -> Void = { Thread.sleep(forTimeInterval: $0) },
+        readText: () throws -> String = { try readPromptText() },
+        ready: () -> Bool = { isComposerReady() }
+    ) throws -> String {
+        let timeout = transcriptTimeout
+        let deadline = now().addingTimeInterval(timeout)
         // If we just stopped a recording, the transcript is appended to whatever was in the box,
         // so the value must change. Only a Submit without recording may pass the box as-is.
         let baselineIsText = !wasRecording && !isEmptyOrPlaceholder(baseline)
         var previous = ""
-        var unchangedSince = Date()
-        while Date() < deadline {
+        var unchangedSince = now()
+        while now() < deadline {
             try checkSubmissionCancellation()
-            Thread.sleep(forTimeInterval: pollInterval)
-            let current = (try? readPromptText()) ?? ""
+            pause(pollInterval)
+            let current = (try? readText()) ?? ""
+            // A stable partial transcript is not completion: wait for the send-ready UI too.
+            // Reset stability whenever transcription is still busy or the UI cannot be read.
+            guard ready() else {
+                previous = current
+                unchangedSince = now()
+                continue
+            }
             if current != previous {
                 previous = current
-                unchangedSince = Date()
+                unchangedSince = now()
                 continue
             }
             guard !isEmptyOrPlaceholder(current) else { continue }
             guard current != baseline || baselineIsText else { continue }
-            if Date().timeIntervalSince(unchangedSince) >= stableWindow {
+            if now().timeIntervalSince(unchangedSince) >= stableWindow {
                 return current
             }
         }
-        throw Failure(number: -1, message: "\(Int(transcriptTimeout))초 안에 전사 텍스트가 나타나지 않음 (플레이스홀더 제외)")
+        throw Failure(number: -1, message: "\(Int(timeout))초 안에 전사 완료와 보내기 준비를 확인하지 못함. 입력을 유지하고 제출하지 않음")
     }
 
     // Wait until the right slot reads 보내기 (transcription overlay gone, text present).
@@ -691,7 +734,7 @@ enum ChatGPTControl {
             Thread.sleep(forTimeInterval: pollInterval)
         }
         let label = (try? findComposer().label(.right)) ?? "?"
-        report("경고: \(Int(composerReadyTimeout))초 안에 보내기 버튼을 확인하지 못함 (오른쪽 라벨 '\(label)'). 계속 진행")
+        throw Failure(number: -5, message: "\(Int(composerReadyTimeout))초 안에 보내기 준비를 확인하지 못함 (오른쪽 라벨 '\(label)'). 입력을 유지하고 제출하지 않음")
     }
 
     // Submit = stop recording (if recording) -> wait for transcript -> wait for 보내기 -> delete trailing token(s)
@@ -717,8 +760,7 @@ enum ChatGPTControl {
         let transcript = try waitForTranscript(baseline: baseline, wasRecording: wasRecording)
         recordingStartedAt = nil
         report("2/6 전사 확인: '\(transcript.suffix(40))'")
-        try waitForComposerReady()
-
+        // waitForTranscript already verified send readiness throughout the stable window.
         let spoken = spokenCommandCount
         let strip = stripTrailingCommand(transcript, command: .submit, spokenCount: spoken)
         let cleaned = strip.text

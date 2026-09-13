@@ -3,7 +3,7 @@ set -euo pipefail
 cd "${0:A:h:h}"
 mkdir -p build/tests
 xcrun swiftc -swift-version 5 -module-cache-path build/module-cache-v080 \
- Sources/Commands.swift Sources/Accessibility.swift Sources/ChatGPTControl.swift Sources/Localization.swift Tests/main.swift \
+ Sources/LatencyTrace.swift Sources/Commands.swift Sources/Accessibility.swift Sources/ChatGPTControl.swift Sources/Localization.swift Tests/main.swift \
  -framework AppKit -framework ApplicationServices -framework AVFoundation -framework Speech -framework ServiceManagement \
  -o build/tests/commands
 build/tests/commands

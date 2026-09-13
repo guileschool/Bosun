@@ -24,9 +24,9 @@ Where the connected AI supports Computer Use, Bosun can connect spoken requests 
 
 ## Status
 
-Current release: **0.8.13**. Targets Apple Silicon and macOS 14 or later, with English recognition assets available on the device. Menus support English and Korean.
+Current release: **0.8.14**. Targets Apple Silicon and macOS 14 or later, with English recognition assets available on the device. Menus support English and Korean.
 
-Automated checks pass. The release DMG is notarized, its ticket is stapled, and macOS Gatekeeper accepts it. Full spoken-command testing and installation on another Mac are not yet verified. See [validation status](docs/VALIDATION.md).
+The owner confirmed long-dictation sending with the 0.8.14 fix. Automated checks pass. The release DMG is notarized, its ticket is stapled, and macOS Gatekeeper accepts it. Full spoken-command testing and installation on another Mac are not yet verified. See [validation status](docs/VALIDATION.md).
 
 ## Updates
 

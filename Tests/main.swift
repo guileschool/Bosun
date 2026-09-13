@@ -110,3 +110,79 @@ expect(!ChatGPTControl.isMicStartLabel("Transcribe dictation"), "Transcription i
 expect(ChatGPTControl.isMicStartLabel("Dictate"), "English record remains supported")
 expect(ChatGPTControl.isEmptyOrPlaceholder("\nWork with ChatGPT"), "English Work placeholder is not a transcript")
 print("English recording button and placeholder regressions passed")
+
+// Drive the actual transcript polling loop with a delayed final transcription.
+// Long dictation can display a stable partial result before the composer is ready.
+var simulatedTime: TimeInterval = 0
+ChatGPTControl.recordingStartedAt = nil
+let completeDictation = String(repeating: "긴 문장 내용 ", count: 100) + "send please"
+let delayedTranscript = try ChatGPTControl.waitForTranscript(
+    baseline: "", wasRecording: true,
+    now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 },
+    readText: { simulatedTime < 12 ? "일부 전사 내용" : completeDictation },
+    ready: { simulatedTime >= 12 }
+)
+expect(delayedTranscript == completeDictation, "Long dictation: must wait for final ready transcript, otherwise Send cleanup uses stale expected text")
+print("Delayed transcript regression passed")
+
+expect(simulatedTime >= 13, "Final transcript needs a full ready stability window")
+simulatedTime = 0
+let quickTranscript = try ChatGPTControl.waitForTranscript(
+    baseline: "", wasRecording: true,
+    now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 }, readText: { "짧은 문장 send please" }, ready: { true }
+)
+expect(quickTranscript == "짧은 문장 send please" && simulatedTime <= 1.5, "Short ready input should not incur extra delay")
+simulatedTime = 0
+do {
+    _ = try ChatGPTControl.waitForTranscript(
+        baseline: "", wasRecording: true,
+        now: { Date(timeIntervalSince1970: simulatedTime) },
+        pause: { simulatedTime += $0 }, readText: { "아직 처리 중인 전사" }, ready: { false }
+    )
+    fatalError("Busy transcription must time out rather than return partial text")
+} catch let error as ChatGPTControl.Failure {
+    expect(error.number == -1 && simulatedTime >= 20, "Busy timeout must preserve input")
+}
+simulatedTime = 0
+ChatGPTControl.recordingStartedAt = Date().addingTimeInterval(-100)
+let longWait = try ChatGPTControl.waitForTranscript(
+    baseline: "", wasRecording: true,
+    now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 },
+    readText: { simulatedTime < 35 ? "처리 중" : completeDictation },
+    ready: { simulatedTime >= 35 }
+)
+expect(longWait == completeDictation && simulatedTime >= 36, "Long recording uses extended timeout for final readiness")
+ChatGPTControl.recordingStartedAt = nil
+print("Short, busy, and extended transcript timing checks passed")
+
+simulatedTime = 0
+let stoppedAfterTranscription = ChatGPTControl.recordingStateMatches(
+    false,
+    now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 },
+    state: { simulatedTime < 8 ? nil : (recording: false, canCancel: false) }
+)
+expect(stoppedAfterTranscription, "Long dictation: stop must survive a transcription UI lasting more than 3 seconds")
+print("Delayed stop transition regression passed")
+
+simulatedTime = 0
+expect(!ChatGPTControl.recordingStateMatches(
+    true, now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 }, state: { nil }
+), "Missing recording start must fail")
+expect(simulatedTime < 3.2, "Record startup retains its short timeout")
+ChatGPTControl.prepareSubmission()
+ChatGPTControl.submissionInProgress = true
+ChatGPTControl.requestAbort()
+simulatedTime = 0
+expect(!ChatGPTControl.recordingStateMatches(
+    false, now: { Date(timeIntervalSince1970: simulatedTime) },
+    pause: { simulatedTime += $0 }, state: { nil }
+), "Break must cancel stop wait")
+expect(simulatedTime == 0, "Break must not wait for the timeout")
+ChatGPTControl.submissionInProgress = false
+ChatGPTControl.prepareSubmission()
+print("Recording startup timeout and Break checks passed")

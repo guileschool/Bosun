@@ -51,10 +51,10 @@ def main():
         '<style>body{font:15px -apple-system,BlinkMacSystemFont,sans-serif;'
         'line-height:1.55;padding:12px 18px}h2{font-size:20px;margin:0 0 12px}'
         'li{margin:8px 0}ul{padding-left:22px}</style></head><body>'
-        '<h2>Updates, right from Bosun</h2><ul>'
-        '<li>Check for new versions from the menu bar.</li>'
-        '<li>Get update notifications with optional automatic checks.</li>'
-        '<li>Install when you choose. Bosun takes care of the restart.</li>'
+        '<h2>More reliable sending after long dictation</h2><ul>'
+        '<li>Wait for long transcription after stopping the microphone.</li>'
+        '<li>Wait for the final text and send-ready state before cleaning up commands.</li>'
+        '<li>Preserve input on timeout and keep Break available while waiting.</li>'
         '</ul></body></html>')
     ET.SubElement(item, 'enclosure', {
         'url': f'https://github.com/guileschool/Bosun/releases/download/v{version}/{archive.name}',

@@ -334,7 +334,8 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         perform(command, source: L10n.text("수동"))
     }
 
-    private func perform(_ command: VoiceCommand, source: String, spokenCount: Int = 0) {
+    private func perform(_ command: VoiceCommand, source: String, spokenCount: Int = 0, latency: LatencyTrace? = nil) {
+        latency?.mark("perform_enter")
         if command == .abort { ChatGPTControl.requestAbort() }
         guard !busy || command == .abort else {
             status.title = L10n.format("%@ 대기: 이전 명령 실행 중", command.title)
@@ -348,8 +349,9 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         refreshAccessibility(prompt: false)
         execution.title = L10n.format("최근 실행: %@ 진행 중…", command.title)
         ChatGPTControl.queue.async { [weak self] in
+            latency?.mark("queue_enter")
             ChatGPTControl.spokenCommandCount = spokenCount
-            let outcome: Result<Void, Error> = Result { try ChatGPTControl.run(command) }
+            let outcome: Result<Void, Error> = Result { try ChatGPTControl.run(command, latency: latency) }
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.pendingExecutions -= 1
@@ -454,7 +456,9 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
             fail(L10n.text("사용 가능한 마이크 입력 형식이 없음"))
             return
         }
+        let audioTimeline = LatencyAudioTimeline()
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+            audioTimeline.observe(duration: Double(buffer.frameLength) / buffer.format.sampleRate)
             audioRequest.append(buffer)
             guard let self = self else { return }
             var amplitude: Float = 0
@@ -469,12 +473,13 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         tapInstalled = true
         task = recognizer?.recognitionTask(with: audioRequest) { [weak self] result, error in
+            let callbackAt = ProcessInfo.processInfo.systemUptime
             DispatchQueue.main.async {
                 guard let self = self, self.active, self.generation == current else { return }
                 if let result = result {
                     self.callbackCount += 1
                     self.failures = 0
-                    self.consider(result.bestTranscription.segments, generation: current)
+                    self.consider(result.bestTranscription.segments, generation: current, callbackAt: callbackAt, audioStart: audioTimeline.start)
                     if result.isFinal {
                         if let lastSegment = result.bestTranscription.segments.last {
                             self.carriedWord = lastSegment.substring.lowercased().trimmingCharacters(in: .punctuationCharacters.union(.whitespacesAndNewlines))
@@ -503,7 +508,7 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    private func consider(_ segments: [SFTranscriptionSegment], generation current: Int) {
+    private func consider(_ segments: [SFTranscriptionSegment], generation current: Int, callbackAt: TimeInterval, audioStart: TimeInterval?) {
         guard let tail = segments.last else { settle?.invalidate(); recognitionSignature = ""; return }
         let signature = segments.suffix(2).map { "\($0.timestamp):\($0.substring.lowercased())" }.joined(separator: "|")
         guard signature != recognitionSignature else { return }
@@ -571,16 +576,22 @@ final class BosunApp: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         let end = tail.timestamp + tail.duration
         guard end > lastSegmentEnd else { return }
+        let latency = command == .record && LatencyTrace.enabled ? LatencyTrace(callbackAt: callbackAt) : nil
+        if let audioStart = audioStart, tail.duration > 0 {
+            latency?.mark("speech_end_estimate", at: audioStart + end)
+        }
+        latency?.mark("candidate")
         settle = Timer.scheduledTimer(withTimeInterval: CommandTiming.settling(command), repeats: false) { [weak self] _ in
             guard let self = self, self.active, self.generation == current else { return }
             self.lastSegmentEnd = end
             guard Date().timeIntervalSince(self.lastCommandAt) >= CommandTiming.cooldown(previous: self.previousCommand, next: command) else { return }
+            latency?.mark("settled")
             self.lastCommandAt = Date()
             self.previousCommand = command
             self.last.title = L10n.format("최근 명령: %@ · %@", command.title, self.clock.string(from: Date()))
             self.updateStatusIcon()
             self.status.title = L10n.format("%@ 인식됨 · %@", command.title, command.label)
-            self.perform(command, source: L10n.text("음성"), spokenCount: spokenCount)
+            self.perform(command, source: L10n.text("음성"), spokenCount: spokenCount, latency: latency)
         }
     }
 
