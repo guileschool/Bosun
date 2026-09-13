@@ -1,6 +1,6 @@
 # Bosun
 
-Start ChatGPT’s microphone with your voice. Dictate your message, then send it hands-free. Bosun is a free, MIT-licensed Mac menu bar app.
+**Step away from the desk. Keep working with your voice.** Bosun is a free, MIT-licensed Mac app that connects your spoken requests to ChatGPT—from recording to sending.
 
 ![Bosun demo: voice dictation, transcription, submission, and an English response](docs/media/voice-input-demo.gif)
 
@@ -13,6 +13,14 @@ Say “Record, please”, dictate your message, then say “Send, please”. Sil
 [한국어](docs/README.ko.md) · [Install, use & troubleshooting](docs/USAGE.md) · [Architecture](docs/architecture.ko.md) · [Release guide](docs/RELEASING.md)
 
 Bosun runs in the menu bar and controls dictation and text editing with spoken English commands. Command recognition runs on your Mac. Bosun does not save audio files.
+
+## Away from the desk, still in the conversation
+
+Sit on the sofa or lie down in the living room and speak your next request to ChatGPT running on your Mac. With Bosun listening, say “Record, please”, dictate, then say “Send, please”—without reaching for the keyboard or mouse.
+
+Keep your Mac awake and the target app ready, with the required permissions enabled and a microphone that can clearly pick up your voice from where you are. Bosun is a local voice bridge, not a remote connection over the internet.
+
+Where the connected AI supports Computer Use, Bosun can connect spoken requests to that AI's computer tasks. Bosun itself controls dictation and submission; the AI's available tools, permissions, and confirmations determine which tasks it can perform. This is not a promise that every ChatGPT desktop setup supports computer control.
 
 ## Status
 
@@ -78,6 +86,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Licensed 
 ## Questions
 
 Korean and English questions and bug reports are welcome in repository Issues. See the [reporting checklist](docs/USAGE.md#questions-and-bug-reports). Real-time English support is not promised.
+
+## Join the project
+
+New contributors are welcome: report bugs, test voice commands, improve documentation or translations, or contribute code. Korean and English are both welcome. You do not need write access to propose a change—fork the repository and open a pull request for maintainer review.
+
+[How to contribute](CONTRIBUTING.md) · [Report a bug or suggest an improvement](https://github.com/guileschool/Bosun/issues)
 
 ## Creator
 
